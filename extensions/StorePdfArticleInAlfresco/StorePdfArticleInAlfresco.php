@@ -1,20 +1,22 @@
 <?php
-// Включаем библиотеки расширения
+// have got these modules
 require_once ("main/Store.php");
 require_once ("main/Delete.php");
 require_once ("main/Rename.php");
+require_once ("main/Fix.php");
 
 /**
- * Цепляем все необходимые хэндлеры
+ * Hook hooks
  */
-// Сохранение статьи
+// Create title
 $wgHooks['PageContentSaveComplete'][] = 'onPageContentSave';
 $wgHooks['onArticleInsertComplete'][] = 'onPageContentSave';
 $wgHooks['ArticleSaveComplete'][] = 'onPageContentSave';
-// Удаление статьи
+// Delete article
 $wgHooks['ArticleConfirmDelete'][] = 'onArticleDelete';
 $wgHooks['ArticleDeleteComplete'][] = 'onArticleDeleteComplete';
-// Переименовывание статьи
-$wgHooks['ArticleFromTitle'][] = 'onArticleFromTitle';
+// Rename title of article
 $wgHooks['TitleMoveComplete'][] = 'onTitleMoveComplete';
+// Help for ExternalStoreAlfresco of alfresco-php-library
+$wgHooks['ArticleFromTitle'][] = 'onArticleFromTitle';
 ?>

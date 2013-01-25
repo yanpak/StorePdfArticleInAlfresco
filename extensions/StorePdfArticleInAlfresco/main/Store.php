@@ -1,29 +1,21 @@
 <?php
 
-// Загружаем необходимые библиотеки
-require_once ("extensions/AlfrescoConfig.php");
+// Converter
 require_once ("converter/MPdfConverter.php");
 
-if (isset($_SERVER["ALF_AVAILABLE"]) == false) {
-	require_once ("Alfresco/Service/Session.php");
-	require_once ("Alfresco/Service/SpacesStore.php");
-	require_once ("Alfresco/Service/Node.php");
-	require_once ("Alfresco/Service/Version.php");
-}
 
-// Непосредственно обработчик события
+// Handler
 function onPageContentSave($article) {
 
-	// Получаем название статьи
+	// Getting the arcticle's title
 	$article = $article -> getTitle() -> getDBkey();
 
-	// Инициализируем конвертер. Берем содержимое статьи в PDF
-	//$pdfConvertor = PdfConverterFactory::getPdfConverter();
+	// Initializing the converter
 	$pdfConvertor = new MPdfConverter();
 	$pdfConvertor -> initialize();
 	$data = $pdfConvertor -> getRawPdf(array($article));
 
-	// Создаем сессию AlfrescoStore
+	// Creating the repository ref
 	$repository = new Repository($GLOBALS['alfURL']);
 	try {
 		$ticket = $repository -> authenticate($GLOBALS['alfUser'], $GLOBALS['alfPassword']);
@@ -31,25 +23,25 @@ function onPageContentSave($article) {
 		die('Could not authenticate user "' . $GLOBALS['alfUser'] . '"');
 	}
 
-	// Создаем сессию
+	// Creating the session
 	$session = $repository -> createSession($ticket);
 
-	// Получаем хранилище
+	// getting the store
 	$store = $session -> getStoreFromString($GLOBALS['alfWikiStore']);
 
-	// Получаем пространство
+	// getting the space
 	$results = $session -> query($store, 'PATH:"' . $GLOBALS['alfWikiSpace'] . '"');
 	$wikiSpace = $results[0];
 
-	// Проверяем на наличие изменений в статье. Если их не было, то предыдущее расширение (ExternalStoreAlfresco) не изменило значения данной переменной.
+	// Cheking whether was change of article's content. If was, there is must be stored a value in this variable
 	if ($_SESSION["lastNode"] === "")
 		return true;
 
-	// Создаем нод
+	// Creating node
 	$id = substr($_SESSION["lastNode"], strrpos($_SESSION["lastNode"], "/") + 1);
 	$node = $session -> getNode($store, $id);
 
-	// Обновляем содержимое нода и сохраняем.
+	// Update node's content and saving it
 	$node -> cm_name = str_replace("_", " ", $article);
 	$node -> addAspect("cm_versionable", null);
 	$node -> cm_initialVersion = false;
@@ -57,7 +49,7 @@ function onPageContentSave($article) {
 	$node -> updateContent("cm_content", "application/pdf", "UTF-8", $data);
 	$session -> save();
 
-	// Обнуляем переменную хранящую нод
+	// Zero value
 	$_SESSION["lastNode"] = "";
 
 	return true;

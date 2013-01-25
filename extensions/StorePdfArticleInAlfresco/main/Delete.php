@@ -1,7 +1,7 @@
 <?php
 
 function onArticleDelete($article, $output, &$reason) {
-	// Подготавливаем необходимые данные для дальнейшей работы. Код взят из ExternalStoreAlfresco
+	// Preparing some values for further work
 	$url = null;
 	$fieldName = 'old_text';
 	$revision = Revision::newFromTitle($article -> getTitle());
@@ -31,21 +31,21 @@ function onArticleDeleteComplete(&$article, User &$user, $reason, $id) {
 
 	$session = $repository -> createSession($ticket);
 
-	// Get the store
+	// getting the store
 	$store = $session -> getStoreFromString($GLOBALS['alfWikiStore']);
 
-	// Get the wiki space
+	// getting the space
 	$results = $session -> query($store, 'PATH:"' . $GLOBALS['alfWikiSpace'] . '"');
 	$wikiSpace = $results[0];
 
+	// Obtaining the node
 	$values = explode('/', substr($url, 11));
 	$nodeId = $values[2];
-	
-	// Удаляем нод
+
+	// Deleting the node. Using part of ifresco-phplib
 	$RESTContent = new RESTContent($repository, $wikiSpace, $session);
-	$RESTContent->DeleteNode($nodeId);
-	
-	
+	$RESTContent -> DeleteNode($nodeId);
+
 	return TRUE;
 }
 ?>

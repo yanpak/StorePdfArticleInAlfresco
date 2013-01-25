@@ -2,36 +2,17 @@
 
 require_once ("converter/MPdfConverter.php");
 
-function onArticleFromTitle(Title &$title, &$article) {
-	// Подготавливаем необходимые данные для расширения ExternalStoreAlfresco. Код взят из ExternalStoreAlfresco. В общем-то, их баг я уменьшил
-	$url = null;
-	$fieldName = 'old_text';
-	$revision = Revision::newFromTitle($title);
-	if (isset($revision)) {
-		$dbr = wfGetDB(DB_SLAVE);
-		$row = $dbr -> selectRow('text', array('old_text', 'old_flags'), array('old_id' => $revision -> getTextId()), 'ExternalStoreAlfresco::alfArticleSave');
-		$url = $row -> $fieldName;
-	}
-
-	// Store the details of the article in the session
-	$_SESSION["title"] = ExternalStoreAlfresco::getTitle($title);
-	$_SESSION["lastVersionUrl"] = $url;
-
-	return TRUE;
-
-}
-
 function onTitleMoveComplete(Title &$title, Title &$newtitle, User &$user, $oldid, $newid) {
 
-	// Получаем название новой статьи
+	// Getting the arcticle's title
 	$article = $newtitle -> getDBkey();
 
-	// Инициализируем конвертер. Берем содержимое статьи в PDF
+	// Initializing the converter
 	$pdfConvertor = new MPdfConverter();
 	$pdfConvertor -> initialize();
 	$data = $pdfConvertor -> getRawPdf(array($article));
 
-	// Создаем сессию AlfrescoStore
+	// Creating the repository ref
 	$repository = new Repository($GLOBALS['alfURL']);
 	try {
 		$ticket = $repository -> authenticate($GLOBALS['alfUser'], $GLOBALS['alfPassword']);
@@ -39,28 +20,28 @@ function onTitleMoveComplete(Title &$title, Title &$newtitle, User &$user, $oldi
 		die('Could not authenticate user "' . $GLOBALS['alfUser'] . '"');
 	}
 
-	// Создаем сессию
+	// Creating the session
 	$session = $repository -> createSession($ticket);
 
-	// Получаем хранилище
+	// getting the store
 	$store = $session -> getStoreFromString($GLOBALS['alfWikiStore']);
 
-	// Получаем пространство
+	// getting the space
 	$results = $session -> query($store, 'PATH:"' . $GLOBALS['alfWikiSpace'] . '"');
 	$wikiSpace = $results[0];
 
-	// Создаем нод
+	// Creating node
 	$id = substr($_SESSION["lastNode"], strrpos($_SESSION["lastNode"], "/") + 1);
 	$node = $session -> getNode($store, $id);
 
-	// Переименовываем название нода(файла) и сохраняем его.
+	// Update node's title and saving it
 	$node -> cm_name = str_replace("_", " ", $newtitle -> getText());
 	$node -> updateContent("cm_content", "application/pdf", "UTF-8", $data);
 	$session -> save();
 
-	// Обнуляем переменную хранящую нод.
+	// Zero value
 	$_SESSION["lastNode"] = "";
-	
+
 	return TRUE;
 }
 ?>
