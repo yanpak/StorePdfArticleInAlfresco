@@ -1,4 +1,6 @@
 <?php
+require_once ("PdfConverter.php");
+
 if (!defined('MEDIAWIKI'))
 	die();
 

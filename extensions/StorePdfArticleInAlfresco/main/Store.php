@@ -2,6 +2,8 @@
 
 // Загружаем необходимые библиотеки
 require_once ("extensions/AlfrescoConfig.php");
+require_once ("converter/MPdfConverter.php");
+
 if (isset($_SERVER["ALF_AVAILABLE"]) == false) {
 	require_once ("Alfresco/Service/Session.php");
 	require_once ("Alfresco/Service/SpacesStore.php");
@@ -16,7 +18,8 @@ function onPageContentSave($article) {
 	$article = $article -> getTitle() -> getDBkey();
 
 	// Инициализируем конвертер. Берем содержимое статьи в PDF
-	$pdfConvertor = PdfConverterFactory::getPdfConverter();
+	//$pdfConvertor = PdfConverterFactory::getPdfConverter();
+	$pdfConvertor = new MPdfConverter();
 	$pdfConvertor -> initialize();
 	$data = $pdfConvertor -> getRawPdf(array($article));
 
@@ -56,7 +59,7 @@ function onPageContentSave($article) {
 
 	// Обнуляем переменную хранящую нод
 	$_SESSION["lastNode"] = "";
-	
+
 	return true;
 }
 ?>

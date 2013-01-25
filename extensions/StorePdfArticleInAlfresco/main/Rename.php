@@ -1,5 +1,7 @@
 <?php
 
+require_once ("converter/MPdfConverter.php");
+
 function onArticleFromTitle(Title &$title, &$article) {
 	// Подготавливаем необходимые данные для расширения ExternalStoreAlfresco. Код взят из ExternalStoreAlfresco. В общем-то, их баг я уменьшил
 	$url = null;
@@ -25,7 +27,7 @@ function onTitleMoveComplete(Title &$title, Title &$newtitle, User &$user, $oldi
 	$article = $newtitle -> getDBkey();
 
 	// Инициализируем конвертер. Берем содержимое статьи в PDF
-	$pdfConvertor = PdfConverterFactory::getPdfConverter();
+	$pdfConvertor = new MPdfConverter();
 	$pdfConvertor -> initialize();
 	$data = $pdfConvertor -> getRawPdf(array($article));
 
