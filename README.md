@@ -2,7 +2,7 @@
 
 Extension for MediaWiki platform.
 
-Perfoms convertation mediawiki's article into Adobe PDF file and storing it in the Alfresco repository whenever ones was created or edited in the Mediawiki. Also, extension enchances some abilities of the Alfresco-php-sdk library. Avoid of  rising "soap call" exception in the front of the user's eyes.
+Perfoms convertation of mediawiki's articles into Adobe PDF files and storing them in the Alfresco repository whenever ones was created or edited in the Mediawiki. Also, extension enchances some abilities of the Alfresco-php-sdk library. Avoids of  rising "soap call" exception.
 	
 For goal of convertation articles into PDF, extension uses MPDF54 converter (supports UTF-8)
 	
